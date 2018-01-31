@@ -8,6 +8,8 @@ typedef enum User_Choice
     PUSH,
     POP,
     PRINT_QUEUE,
+    IS_EMPTY,
+    COUNT,
     EXIT
   } User_Choice;
 
@@ -20,8 +22,11 @@ static void Pop(Queue**);
 static void Print(Queue**);
 static User_Choice InputToUserChoice(int _input);
 static void Exit(Queue**);
+static void IsEmpty(Queue**);
+static void Count(Queue**);
 
-static Func funcs[] = {CreateQueue, DeleteQueue, Push, Pop, Print, Exit};
+
+static Func funcs[] = {CreateQueue, DeleteQueue, Push, Pop, Print, IsEmpty, Count, Exit};
 
 int main()
 {
@@ -31,7 +36,7 @@ int main()
   
   while(choice != EXIT)
   {
-    printf("Please make a choice:\n(1) Create queue\n(2) Delete queue\n(3) Push data\n(4) Pop data\n(5) Print queue\n(6) Exit\n\n");
+    printf("Please make a choice:\n(1) Create queue\n(2) Delete queue\n(3) Push data\n(4) Pop data\n(5) Print queue\n(6) Check if the queue is empty\n(7) Number of elements in the queue\n(8) Exit\n\n");
     scanf("%d", &input);
     choice = InputToUserChoice(input);
     funcs[choice](&queue);
@@ -59,6 +64,35 @@ static void CreateQueue(Queue** _queue)
 
 static void Exit(Queue** _queue)
 {}
+
+static void IsEmpty(Queue** _queue)
+{
+  if(!*_queue)
+  {
+    printf("Queue does not exist\n");
+    return;
+  }
+
+  if(Queue_IsEmpty(*_queue))
+  {
+    printf("The queue is empty\n");
+  }
+  else
+  {
+    printf("The queue is not empty\n");
+  }
+}
+
+static void Count(Queue** _queue)
+{
+  if(!*_queue)
+  {
+    printf("Queue does not exist\n");
+    return;
+  }
+
+  printf("Number of elements in the queue: %d\n", Queue_Count(*_queue));
+}
 
 static void DeleteQueue(Queue** _queue)
 {

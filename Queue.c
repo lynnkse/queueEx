@@ -2,16 +2,22 @@
 #include <stdio.h>
 
 
-#include "queue.h"
+#include "Queue.h"
+
+#define TRUE 1
+#define FALSE 0
 
 struct Queue
 {
   QUEUE_DATA*    m_vec;
   size_t  m_head;      /* Index of head in m_vec. */
   size_t  m_tail;      /* Index of tail in m_vec. */
+  size_t  m_size;      /* Capacity of the queue   */
 };
 
-Queue* QueueCreate(size_t _size)
+static Queue_Result PrintData(QUEUE_DATA _data);
+
+Queue* Queue_Create(unsigned int _size)
 {
   Queue* queue;
   if(_size == 0)
@@ -25,21 +31,21 @@ Queue* QueueCreate(size_t _size)
     return NULL;
   }
 
-  queue->m_vec = malloc(_size * sizeof(int));
+  queue->m_vec = malloc((_size + 1) * sizeof(int));
   if (!queue->m_vec)
   {
       free(queue);
       return NULL;
   }
 
-  queue->m_size = _size;
+  queue->m_size = _size + 1;
   queue->m_head = 0;
   queue->m_tail = 0;
 
   return queue;
 }
 
-void QueueDestroy(Queue *_queue)
+void Queue_Destroy(Queue *_queue)
 {
     if (_queue)
     {
@@ -48,90 +54,117 @@ void QueueDestroy(Queue *_queue)
     }
 }
 
-ADTErr QueueInsert(Queue *_queue, int _item)
+Queue_Result Queue_PushBack(Queue *_queue, int _item)
 {
 
    if(!_queue)
    {
-     return ERR_NOT_INITIALIZED;
+     return QUEUE_NOT_INITIALIZED_ERROR;
    }
 
-   if (_queue->m_nItems == _queue->m_size)
+   if((_queue->m_tail + 1) % _queue->m_size == _queue->m_head)
    {
-       /* Queue is full. */
-       return ERR_OVERFLOW;
+     return QUEUE_ISFULL_ERROR;
    }
 
-    *(_queue->m_vec + _queue->m_tail) = _item;
+   *(_queue->m_vec + _queue->m_tail) = _item;
 
     _queue->m_tail =  (_queue->m_tail+1) % _queue->m_size;
-    ++_queue->m_nItems;
 
-    return ERR_OK;
-
+    return QUEUE_SUCCESS;
 }
 
-ADTErr QueueRemove(Queue *_queue, int *_item)
+Queue_Result Queue_PopFront(Queue *_queue, int *_item)
 {
 
     if (!_queue)
     {
-        return ERR_NOT_INITIALIZED;
+        return QUEUE_NOT_INITIALIZED_ERROR;
     }
 
-    if (!_queue->m_nItems)
+    if (_queue->m_head == _queue->m_tail)
     {
         /* Queue is empty. */
-        return ERR_UNDERFLOW;
+        return QUEUE_ISEMPTY_ERROR;
     }
 
     *_item = *(_queue->m_vec + _queue->m_head);
     _queue->m_head = (_queue->m_head + 1) % _queue->m_size;
-    --_queue->m_nItems;
-
-    return ERR_OK;
+    return QUEUE_SUCCESS;
 }
 
-int QueueIsEmpty(Queue *_queue)
+unsigned int Queue_Count(const Queue *_queue)
 {
-    if (!_queue)
+  size_t head, tail;
+  unsigned int ret_val;
+
+  if(!_queue)
+  {
+    return 0;
+  }
+
+  head = _queue->m_head;
+  tail = _queue->m_tail;
+  
+  if(tail >= head)
+  {
+    ret_val = tail-head;
+  }
+  else
+  {
+    ret_val = tail + _queue->m_size - head;
+  }
+
+  return ret_val;
+}
+
+int Queue_IsEmpty(const Queue *_queue)
+{
+  if(!_queue)
+  {
+    return TRUE;
+  }
+
+  return (_queue->m_tail == _queue->m_head);
+}
+
+void Queue_ForEach(const Queue *_queue, QueueCallback _func)
+{
+  size_t head, tail;
+  
+  if(!_queue)
+  {
+    return;
+  }
+
+  head = _queue->m_head;
+  tail = _queue->m_tail;
+  
+  while(head != tail)
+  {
+    if(_func(_queue->m_vec[head]) != QUEUE_SUCCESS)
     {
-        return TRUE;
+      break;
     }
 
-    return(_queue->m_nItems ? FALSE : TRUE);
-
+    head = (head + 1) % _queue->m_size;
+  }
 }
 
-/*  Unit-Test functions  */
-void QueuePrint(Queue *_queue)
+void Queue_Print(const Queue *_queue)
 {
+  if(!_queue)
+  {
+    return;
+  }
 
-    if (!_queue) {
-         printf("Queue details> Queue is not initialized.\n");
-         return;
-    }
-
-    printf("Queue details> Size: %u, Head: %u, Tail: %u, nItems: %u\n", _queue->m_size, _queue->m_head,
-                                                                        _queue->m_tail, _queue->m_nItems);
-    if (!_queue->m_nItems){
-      printf("Queue items>   The Queue is empty.");
-      return;
-    }
-
-    printf("Queue items>   ");
-    int i;
-    if (_queue->m_head < _queue->m_tail){
-        for (i=_queue->m_head; i<_queue->m_tail; ++i) {
-            printf("%d ",_queue->m_vec[i]);
-        }
-    } else {
-        for (i=_queue->m_head; i<_queue->m_size; ++i) {
-            printf("%d ",_queue->m_vec[i]);
-        }
-        for (i=0; i<_queue->m_tail; ++i) {
-            printf("%d ",_queue->m_vec[i]);
-        }
-    }
-    printf("\n-------------------------------------------------------\n");
+  Queue_ForEach(_queue, PrintData);
 }
+
+static Queue_Result PrintData(QUEUE_DATA _data)
+{
+  printf("%d ", _data);
+
+  return QUEUE_SUCCESS;
+}
+
