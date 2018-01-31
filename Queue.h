@@ -5,10 +5,9 @@ typedef struct Queue Queue;
 typedef int QUEUE_DATA;
 
 typedef enum Vector_Result {
-	VECTOR_SUCCESS,
-	VECTOR_UNITIALIZED_ERROR,				/**< Uninitialized vector error 	*/
-	VECTOR_ALLOCATION_ERROR,				/**< realloc error on grow/shrink   */
-	VECTOR_INDEX_OUT_OF_BOUNDS_ERROR
+	QUEUE_SUCCESS,
+	QUEUE_ISFULL_ERROR,				/**< Uninitialized vector error 	*/
+	QUEUE_ISEMPTY_ERROR,				/**< realloc error on grow/shrink   */
 	/* Add more as needed by your implementation */
 } Vector_Result;
 

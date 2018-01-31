@@ -6,33 +6,37 @@
 
 struct Queue
 {
-    QUEUE_DATA*    m_vec;
-    size_t  m_size;
-    size_t  m_head;      /* Index of head in m_vec. */
-    size_t  m_tail;      /* Index of tail in m_vec. */    
+  QUEUE_DATA*    m_vec;
+  size_t  m_head;      /* Index of head in m_vec. */
+  size_t  m_tail;      /* Index of tail in m_vec. */
 };
 
 Queue* QueueCreate(size_t _size)
 {
-    Queue* queue  = (Queue*) malloc(sizeof(Queue));
-    if (!queue)
-    {
-        return NULL;
-    }
+  Queue* queue;
+  if(_size == 0)
+  {
+    return NULL;
+  }
+    
+  queue  = (Queue*) malloc(sizeof(Queue));
+  if (!queue)
+  {
+    return NULL;
+  }
 
-    queue->m_vec = malloc(_size * sizeof(int));
-    if (!queue->m_vec)
-    {
-        free(queue);
-        return NULL;
-    }
+  queue->m_vec = malloc(_size * sizeof(int));
+  if (!queue->m_vec)
+  {
+      free(queue);
+      return NULL;
+  }
 
-    queue->m_size    = _size;
-    queue->m_head    = 0;
-    queue->m_tail    = 0;
-    queue->m_nItems  = 0;
+  queue->m_size = _size;
+  queue->m_head = 0;
+  queue->m_tail = 0;
 
-    return queue;
+  return queue;
 }
 
 void QueueDestroy(Queue *_queue)
@@ -49,7 +53,7 @@ ADTErr QueueInsert(Queue *_queue, int _item)
 
    if(!_queue)
    {
-        return ERR_NOT_INITIALIZED;
+     return ERR_NOT_INITIALIZED;
    }
 
    if (_queue->m_nItems == _queue->m_size)
