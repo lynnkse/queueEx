@@ -17,6 +17,7 @@ struct Queue
 
 static Queue_Result PrintData(QUEUE_DATA _data);
 
+
 Queue* Queue_Create(unsigned int _size)
 {
   Queue* queue;
