@@ -4,13 +4,26 @@
 #include <string.h> 
 #include "Queue.h"
 
-int g_multiplicationProduct = 1;
-
-static Queue_Result MultiplyAll(QUEUE_DATA data)
+typedef struct TestStruct
 {
-  g_multiplicationProduct *= data;
+    int m_a;
+    int m_b;
+} TestStruct;
 
-  return QUEUE_SUCCESS;
+void Destruct(void* _item)
+{
+    free((TestStruct*)_item);
+}
+
+void EmptyDestruct(void* _item)
+{}
+
+Queue_Result TimesTwo(void* _item)
+{
+    ((TestStruct*)_item)->m_a *= 2;
+    ((TestStruct*)_item)->m_b *= 2;
+
+    return QUEUE_SUCCESS;
 }
 
 UNIT(CREATION)
@@ -20,75 +33,80 @@ queue = Queue_Create(5);
 failed_queue = Queue_Create(0);
 ASSERT_THAT(queue);
 ASSERT_THAT(!failed_queue);
+Queue_Destroy(queue, Destruct);
 END_UNIT
 
-UNIT(INSERTION)
+UNIT(SIMPLE_INSERTION)
+TestStruct* ts = malloc(sizeof(TestStruct));
 Queue* queue = Queue_Create(5);
 ASSERT_THAT(Queue_IsEmpty(queue));
-Queue_PushBack(queue, 5);
+Queue_PushBack(queue, ts);
 ASSERT_THAT(!Queue_IsEmpty(queue));
-Queue_Destroy(queue);
-queue = NULL;
-ASSERT_THAT(1);
+Queue_Destroy(queue, Destruct);
 END_UNIT
 
-UNIT(FAILED_INSERTION_OVERFLOW)
-Queue* queue = Queue_Create(3);
-ASSERT_THAT(Queue_PushBack(queue, 1) == QUEUE_SUCCESS);
-ASSERT_THAT(Queue_PushBack(queue, 1) == QUEUE_SUCCESS);
-ASSERT_THAT(Queue_PushBack(queue, 1) == QUEUE_SUCCESS);
-ASSERT_THAT(Queue_PushBack(queue, 1) != QUEUE_SUCCESS);
-Queue_Destroy(queue);
-queue = NULL;
-ASSERT_THAT(1);
-END_UNIT
-
-UNIT(POP)
-int data;
+UNIT(IN_OUT)
 Queue* queue = Queue_Create(5);
-Queue_PushBack(queue, 1);
-Queue_PushBack(queue, 2);
-Queue_PushBack(queue, 3);
-Queue_PopFront(queue, &data);
-ASSERT_THAT(data == 1);
-Queue_PopFront(queue, &data);
-ASSERT_THAT(data == 2);
-Queue_PopFront(queue, &data);
-ASSERT_THAT(data == 3);
-Queue_Destroy(queue);
-queue = NULL;
-ASSERT_THAT(1);
-END_UNIT
+TestStruct* ts = NULL;
+TestStruct data[] =
+{
+    {1, 2},
+    {3, 4},
+    {5, 6}
+};
 
-UNIT(NUM_OF_ITEMS)
-Queue* queue = Queue_Create(5);
-ASSERT_THAT(Queue_Count(queue) == 0);
-Queue_PushBack(queue, 1);
-Queue_PushBack(queue, 2);
-Queue_PushBack(queue, 3);
-ASSERT_THAT(Queue_Count(queue) == 3);
-Queue_Destroy(queue);
-queue = NULL;
-ASSERT_THAT(1);
+Queue_PushBack(queue, &data[0]);
+Queue_PushBack(queue, &data[1]);
+Queue_PushBack(queue, &data[2]);
+
+Queue_PopFront(queue, (void*)&ts);
+ASSERT_THAT(ts->m_a == 1 && ts->m_b == 2);
+Queue_PopFront(queue, (void*)&ts);
+ASSERT_THAT(ts->m_a == 3 && ts->m_b == 4);
+Queue_PopFront(queue, (void*)&ts);
+ASSERT_THAT(ts->m_a == 5 && ts->m_b == 6);
+
+Queue_Destroy(queue, EmptyDestruct);
 END_UNIT
 
 UNIT(FOR_EACH)
 Queue* queue = Queue_Create(5);
-Queue_PushBack(queue, 1);
-Queue_PushBack(queue, 2);
-Queue_PushBack(queue, 3);
-Queue_ForEach(queue, MultiplyAll);
-ASSERT_THAT(g_multiplicationProduct == 6);
-Queue_Destroy(queue);
-queue = NULL;
-ASSERT_THAT(1);
+TestStruct* ts = NULL;
+int sumBefore  = 0, sumAfter = 0;
+int i;
+TestStruct data[] =
+{
+    {1, 2},
+    {3, 4},
+    {5, 6}
+};
+
+for(i = 0; i < 3; ++i)
+{
+    sumBefore += data[i].m_a;
+    sumBefore += data[i].m_b;
+}
+
+Queue_PushBack(queue, &data[0]);
+Queue_PushBack(queue, &data[1]);
+Queue_PushBack(queue, &data[2]);
+
+Queue_ForEach(queue, TimesTwo);
+
+for(i = 0; i < 3; ++i)
+{
+    sumAfter += data[i].m_a;
+    sumAfter += data[i].m_b;
+}
+
+ASSERT_THAT(sumAfter == sumBefore * 2);
+
+Queue_Destroy(queue, EmptyDestruct);
 END_UNIT
 
 TEST_SUITE(QUEUE_TESTS)
 TEST(CREATION)
-TEST(INSERTION)
-TEST(FAILED_INSERTION_OVERFLOW)
-TEST(POP)
-TEST(NUM_OF_ITEMS)
+TEST(SIMPLE_INSERTION)
+TEST(IN_OUT)
 TEST(FOR_EACH)
 END_SUITE

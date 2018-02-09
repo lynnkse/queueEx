@@ -2,7 +2,7 @@
 #include <stdio.h>
 
 typedef enum User_Choice
-  {
+{
     CREATE_QUEUE,
     DELETE_QUEUE,
     PUSH,
@@ -11,9 +11,15 @@ typedef enum User_Choice
     IS_EMPTY,
     COUNT,
     EXIT
-  } User_Choice;
+} User_Choice;
 
 typedef void (*Func)(Queue**);
+
+typedef struct TestStruct
+{
+    int m_a;
+    int m_b;
+}
 
 int main()
 {
