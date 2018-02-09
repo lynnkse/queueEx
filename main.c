@@ -15,7 +15,12 @@ typedef enum User_Choice
 
 typedef void (*Func)(Queue**);
 
-static void CreateQueue(Queue**);
+int main()
+{
+    return 0;
+}
+
+/*static void CreateQueue(Queue**);
 static void DeleteQueue(Queue**);
 static void Push(Queue**);
 static void Pop(Queue**);
@@ -24,7 +29,6 @@ static User_Choice InputToUserChoice(int _input);
 static void Exit(Queue**);
 static void IsEmpty(Queue**);
 static void Count(Queue**);
-
 
 static Func funcs[] = {CreateQueue, DeleteQueue, Push, Pop, Print, IsEmpty, Count, Exit};
 
@@ -166,3 +170,4 @@ static User_Choice InputToUserChoice(int _input)
   return _input - 1;
 }
 
+*/

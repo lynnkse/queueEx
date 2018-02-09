@@ -9,10 +9,12 @@ typedef enum Queue_Result {
 	QUEUE_ISFULL_ERROR,				/**< Uninitialized vector error 	*/
 	QUEUE_ISEMPTY_ERROR,				/**< realloc error on grow/shrink   */
 	QUEUE_NOT_INITIALIZED_ERROR,
-	QUEUE_CALLBACK_FUNC_FAIL
+	QUEUE_CALLBACK_FUNC_FAIL,
+	NULL_PTR_ERROR
 } Queue_Result;
 
-typedef Queue_Result (*QueueCallback)(QUEUE_DATA);
+typedef Queue_Result (*QueueCallback)(void*);
+typedef void (*DestructFunc)(void*);
 
 /**  
  * @brief Create a queue on a cyclic buffer. 
@@ -37,7 +39,7 @@ Queue* Queue_Create(unsigned int _size);
  * @return void
  * @warning if received param is NULL, function will not do anything 
  */
-void Queue_Destroy(Queue *_queue);
+void Queue_Destroy(Queue *_queue,  DestructFunc _destructFunc);
 
 /**  
  * @brief Pushed data into the queue
@@ -46,7 +48,7 @@ void Queue_Destroy(Queue *_queue);
  * @return Queue_Result - error code 
  * @warning if queue capacity is reached, item will not be pushed 
  */
-Queue_Result Queue_PushBack(Queue *_queue, QUEUE_DATA _item);
+Queue_Result Queue_PushBack(Queue *_queue, void* _item);
 
 /**  
  * @brief Pop data from the queue
@@ -55,7 +57,7 @@ Queue_Result Queue_PushBack(Queue *_queue, QUEUE_DATA _item);
  * @return Queue_Result - error code 
  * @warning if queue capacity is reached, item will not be pushed 
  */
-Queue_Result Queue_PopFront(Queue *_queue, QUEUE_DATA *_item);
+Queue_Result Queue_PopFront(Queue *_queue, void** _item);
 
 /**  
  * @brief Returns number of items in queue
