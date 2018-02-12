@@ -18,7 +18,7 @@ test : $(OBJC)
 	$(CC) $(OBJC) -o test
 
 utest : Queue.o utest.o
-	$(CC) Queue.o utest.o -o utest
+	$(CC) Queue.o utest.o -o utest -lpthread 
 
 clean: 
 	rm -f $(OBJC) libds.so 
